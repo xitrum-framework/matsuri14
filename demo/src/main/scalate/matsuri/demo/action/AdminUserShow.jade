@@ -1,0 +1,23 @@
+- import matsuri.demo.action._
+- import matsuri.demo.model.User
+- val user = at("user").asInstanceOf[User]
+
+div.row
+  h2.pull-left = s"Detail of ${user.name}"
+  form(role="form" method="post" action={url[AdminUserDelete](("name", user.name))})
+    != antiCsrfInput
+    input(type="hidden" name="_method" value="delete")
+    button.btn.btn-danger.pull-right#deleteButton(type="submit" style="margin-top:20px;") =t("Delete")
+
+form(role="form" method="post" action={url[AdminUserUpdate](("name", user.name))})
+  != antiCsrfInput
+  input(type="hidden" name="_method" value="put")
+  div.form-group
+    label(for="newUserAge") =t("Age")
+    input.form-control#newUserAge(name="age" type="text" placeholder={t("Enter Age")} number=true min=0 max=100 required=false value={user.age})
+  div.form-group
+    label(for="newUserDesc") =t("Description")
+    input.form-control#newUserDesc(name="desc" type="text" placeholder={t("Enter Description")} required=false value={user.desc})
+  button.btn.btn-primary(type="submit") = t("Update")
+  a.btn.btn-default.pull-right(href={url[AdminIndex]}) = t("Back")
+

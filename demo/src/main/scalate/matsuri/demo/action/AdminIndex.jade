@@ -1,0 +1,56 @@
+- import matsuri.demo.action._
+- import matsuri.demo.model.User
+
+div.modal.fade#userCreateModal(tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true")
+  div.modal-dialog
+    div.modal-content
+      form(role="form" method="post" action={url[AdminUserCreate]})
+        != antiCsrfInput
+        div.modal-header
+          button.close(type="button" data-dismiss="modal")
+            span(aria-hidden="true") &times;
+            span.sr-only =t("Close")
+          h4.modal-title#myModalLabel =t("Create New User")
+        div.modal-body
+          div.form-group
+            label(for="newUserName") =t("Name")
+            input.form-control#newUserName(name="name" type="text" placeholder={t("Enter Name")} minlength=5 maxlenght=10 required=true)
+          div.form-group
+            label(for="newUserPass") =t("Password")
+            input.form-control#newUserPass(name="password" type="password" placeholder={t("Enter Password")} minlength=8 required=true)
+          div.form-group
+            label(for="newUserAge") =t("Age")
+            input.form-control#newUserAge(name="age" type="text" placeholder={t("Enter Age")} number=true min=0 max=100 required=false)
+          div.form-group
+            label(for="newUserDesc") =t("Description")
+            input.form-control#newUserDesc(name="desc" type="text" placeholder={t("Enter Description")} required=false)
+        div.modal-footer
+          button.btn.btn-default(type="button" data-dismiss="modal") = t("Cancel")
+          button.btn.btn-primary(type="submit") = t("Save")
+
+div.row
+  h2.pull-left Hello! This is admin page
+  button.btn.btn-primary.pull-right#createNew(data-toggle="modal" data-target="#userCreateModal") =t("Create New User")
+
+hr
+
+div.row#usersTable
+  table.table.table-striped#messageTable
+    thead
+      tr.bg-primary
+        th.col-xs-2 =t("Name")
+        th.col-xs-2 =t("Age")
+        th.col-xs-2 =t("Desc")
+        th.col-xs-2 =t("createdAt")
+        th.col-xs-2 =t("updatedAt")
+        th.col-xs-2 =t("lastLogin")
+    tbody
+    - for (user <- at("users").asInstanceOf[List[User]])
+      tr
+        th
+          a(href={url[AdminUserShow](("name", user.name))}) = user.name
+        th = user.age
+        th = user.desc
+        th = user.createdAtAsStr
+        th = user.updatedAtAsStr
+        th = user.lastLoginAsStr

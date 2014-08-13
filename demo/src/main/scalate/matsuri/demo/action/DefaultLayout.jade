@@ -1,0 +1,26 @@
+- import matsuri.demo.action._
+
+!!! 5
+html
+  head
+    != antiCsrfMeta
+    != xitrumCss
+
+    meta(content="text/html; charset=utf-8" http-equiv="content-type")
+    title ScalaMatsuri2014 Xitrum Demo
+
+    link(rel="shortcut icon" href={publicUrl("favicon.ico")})
+    link(type="text/css" rel="stylesheet" media="all" href={webJarsUrl("bootstrap/3.2.0/css", "bootstrap.css", "bootstrap.min.css")})
+    link(type="text/css" rel="stylesheet" media="all" href={publicUrl("app.css")})
+
+  body
+    .container
+      h1
+
+      #flash
+        !~ jsRenderFlash()
+      != renderedView
+
+    != jsDefaults
+    script(src={webJarsUrl("bootstrap/3.2.0/js", "bootstrap.js", "bootstrap.min.js")})
+    != jsForView

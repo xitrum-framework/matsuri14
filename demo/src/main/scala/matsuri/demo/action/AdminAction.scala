@@ -17,7 +17,7 @@ import matsuri.demo.model.User
   Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
 )
 @GET("admin")
-class AdminIndex extends DefaultLayout with AdminFilter{
+class AdminIndex extends DefaultLayout with AdminFilter {
   def execute() {
 
   //
@@ -51,7 +51,7 @@ class AdminIndex extends DefaultLayout with AdminFilter{
   Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
 )
 @POST("admin/user")
-class AdminUserCreate extends DefaultLayout with AdminFilter{
+class AdminUserCreate extends Action with AdminFilter{
   def execute() {
 
     // Get request paramaters
@@ -109,7 +109,7 @@ class AdminUserCreate extends DefaultLayout with AdminFilter{
   Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
 )
 @PUT("admin/user/:name")
-class AdminUserUpdate extends DefaultLayout with AdminFilter{
+class AdminUserUpdate extends Action with AdminFilter {
   def execute() {
 
     val name      = param("name")
@@ -157,7 +157,7 @@ class AdminUserUpdate extends DefaultLayout with AdminFilter{
   Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
 )
 @DELETE("admin/user/:name")
-class AdminUserDelete extends DefaultLayout with AdminFilter{
+class AdminUserDelete extends Action with AdminFilter {
   def execute() {
 
     val name   = param("name")
@@ -192,7 +192,7 @@ class AdminUserDelete extends DefaultLayout with AdminFilter{
   Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
 )
 @GET("admin/user/:name")
-class AdminUserShow extends DefaultLayout with AdminFilter{
+class AdminUserShow extends DefaultLayout with AdminFilter {
   def execute() {
 
     val name   = param("name")

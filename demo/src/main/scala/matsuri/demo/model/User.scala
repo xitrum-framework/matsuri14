@@ -96,7 +96,7 @@ object User extends Log {
   }
 
   def authLogin(inputName:String, inputPassword:String) :Option[User] = {
-    findById(inputName) match {
+    findByName(inputName) match {
       case u@Some(user) =>
         if (user.auth(makeHash(inputName, inputPassword, 10))) {
           val q      = MongoDBObject("name" -> inputName)

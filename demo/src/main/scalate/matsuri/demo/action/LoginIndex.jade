@@ -1,0 +1,14 @@
+- import matsuri.demo.action._
+div.col-md-4.col-md-offset-4
+  form.form-signin(method="post" action={url[Login]})
+    h4.form-signin-heading = t("Please sign in")
+    != antiCsrfInput
+    div.control-group
+      div.controls
+        label(for="userName") =t("User Name")
+        input.form-control#userName(placeholder={t("Type your name")} type="text" name="name" minlength=5 maxlenght=10 required=true)
+    div.control-group
+      div.controls
+        label(for="password") =t("Password")
+        input.form-control#password(placeholder={t("Type password")} type="password" name="password" minlength=8 required=true)
+    button.btn.btn-large.btn-primary#loginSubmit(type="submit") = t("login")

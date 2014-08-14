@@ -6,6 +6,10 @@ trait ErrorCD {
 
   val USER_NOT_FOUND        = 101
   val USER_ALREADY_EXISTS   = 102
+
+  val INVALID_CMD           = 201
+  val INVALID_TAG           = 202
+
 }
 
 object ErrorCD extends ErrorCD

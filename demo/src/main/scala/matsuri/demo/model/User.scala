@@ -30,8 +30,6 @@ object User extends Log {
     if (age.isDefined)  o.put("age",  age.get)
     if (desc.isDefined) o.put("desc", desc.get)
 
-    println(o)
-
     if (DB.insertIfNonexistent(DB.usersColl, o)) {
       Right(findByName(name))
     } else {

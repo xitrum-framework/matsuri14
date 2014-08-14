@@ -7,7 +7,7 @@ import xitrum.validator.Required
 import matsuri.demo.session.SVar
 import matsuri.demo.model.User
 
-@GET("login")
+@GET("login", "")
 class LoginIndex extends DefaultLayout {
   def execute() {
     respondView()

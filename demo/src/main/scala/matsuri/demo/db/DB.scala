@@ -54,6 +54,7 @@ object DB extends Log {
     usersColl.ensureIndex(MongoDBObject("name" -> 1 ) , "user_name_index", true)
   }
   private def ensureMsgsIndexies = {
+    usersColl.ensureIndex(MongoDBObject("senderName" -> 1 ))
   }
 
 

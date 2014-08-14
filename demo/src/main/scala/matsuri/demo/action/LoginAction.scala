@@ -16,6 +16,7 @@ class LoginIndex extends DefaultLayout {
 @POST("login")
 class Login extends Action {
   def execute() {
+    session.clear()
     val name     = param("name")
     val password = param("password")
 

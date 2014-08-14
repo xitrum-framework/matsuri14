@@ -6,7 +6,7 @@ import matsuri.demo.actor.Hub
 
 object Boot {
   def main(args: Array[String]) {
-  	Hub.start()
+    Hub.start()
     Server.start()
   }
 }

@@ -41,9 +41,9 @@ div.row#usersTable
         th.col-xs-2 =t("Name")
         th.col-xs-2 =t("Age")
         th.col-xs-2 =t("Desc")
-        th.col-xs-2 =t("createdAt")
-        th.col-xs-2 =t("updatedAt")
-        th.col-xs-2 =t("lastLogin")
+        th.col-xs-2 =t("Created time")
+        th.col-xs-2 =t("Updated time")
+        th.col-xs-2 =t("Last login time")
     tbody
     - for (user <- at("users").asInstanceOf[List[User]])
       tr

@@ -2,26 +2,25 @@ package matsuri.demo.actor
 
 import akka.actor.{Actor, ActorRef, Props, Terminated}
 import glokka.Registry
-import xitrum.Config
-
+import xitrum.{Config, Log}
 
 case class Done(option: Map[String, Any] = Map.empty)        // Hub       -> LocalNode
 case class Publish(option: Map[String, Any] = Map.empty)     // Hub       -> LocalNode
 case class Pull(option: Map[String, Any] = Map.empty)        // LocalNode -> Hub
 case class Push(option: Map[String, Any] = Map.empty)        // LocalNode -> Hub
 case class Subscribe(option: Map[String, Any] = Map.empty)   // LocalNode -> Hub
-case class UnSubscribe(option: Map[String, Any] = Map.empty) // LocalNode -> Hub
+case class Unsubscribe(option: Map[String, Any] = Map.empty) // LocalNode -> Hub
 
 object Hub {
   val KEY_PROXY = "HUB_PROXY"
+
   // Glokka registry
   val actorRegistry = Registry.start(Config.actorSystem, KEY_PROXY)
 
   // To force start registry at process start up,
   // Call this method at `main` before start `xitrum.Server`
-  def start(){}
+  def start() {}
 }
-
 
 trait Hub extends Actor {
   protected var clients = Seq[ActorRef]()
@@ -29,7 +28,7 @@ trait Hub extends Actor {
 
   def receive = {
     case Push(option) =>
-      xitrum.Log.debug(s"[Hub][${node}] Received Push request")
+      Log.debug(s"[Hub][${node}] Received Push request")
       val result = handlePush(option)
       clients.foreach { client =>
         if (client != sender) client ! Publish(result)
@@ -37,39 +36,41 @@ trait Hub extends Actor {
       sender ! Done(result)
 
     case Pull(option) =>
-      xitrum.Log.debug(s"[Hub][${node}] Received Pull request")
+      Log.debug(s"[Hub][${node}] Received Pull request")
       sender ! Done(handlePull(option))
 
     case Subscribe(option) =>
-      xitrum.Log.debug(s"[Hub][${node}] Received Subscribe request")
-      clients = clients.filterNot(_ == sender) :+ sender
-      context.watch(sender)
-      sender ! Done(option)
-      val result = handleSubscribe(sender, option)
-      clients.foreach { client =>
-        if (client != sender) client ! Publish(result)
+      Log.debug(s"[Hub][${node}] Received Subscribe request")
+      if (!clients.contains(sender)) {
+        clients = clients :+ sender
+        context.watch(sender)
+        val result = handleSubscribe(sender, option)
+        clients.foreach { client =>
+          if (client != sender) client ! Publish(result)
+        }
+        sender ! Done(result)
       }
 
-    case UnSubscribe(option) =>
-      xitrum.Log.debug(s"[Hub][${node}] Received UnSubscribe request")
-      clients =  clients.filterNot(_ == sender)
+    case Unsubscribe(option) =>
+      Log.debug(s"[Hub][${node}] Received Unsubscribe request")
+      clients = clients.filterNot(_ == sender)
       context.unwatch(sender)
-      sender ! Done(option)
       val result = handleUnsubscribe(sender, option)
       clients.foreach { client =>
         if (client != sender) client ! Publish(result)
       }
+      sender ! Done(result)
 
     case Terminated(client) =>
-      xitrum.Log.debug(s"[Hub][${node}] Received Terminated event"+client.toString)
+      Log.debug(s"[Hub][${node}] Received Terminated event"+client.toString)
       clients = clients.filterNot(_ == client)
-      val result = handleUnsubscribe(client, Map.empty)
+      val result = handleTerminated(client)
       clients.foreach { client =>
         if (client != sender) client ! Publish(result)
       }
 
     case ignore =>
-      xitrum.Log.warn(s"[Hub][${node}] Unexpected message: $ignore")
+      Log.warn(s"[Hub][${node}] Unexpected message: $ignore")
   }
 
   // Implement these method as you like
@@ -77,17 +78,17 @@ trait Hub extends Actor {
   def handlePull(option: Map[String, Any]): Map[String, Any]
   def handleSubscribe(client: ActorRef,   option: Map[String, Any]): Map[String, Any]
   def handleUnsubscribe(client: ActorRef, option: Map[String, Any]): Map[String, Any]
+  def handleTerminated(client: ActorRef): Map[String, Any]
 }
 
 trait HubClient extends Actor {
   protected lazy val node = self.toString
+
   def lookUpHub(key: String, hubProps: Props, option: Any = None) {
-    xitrum.Log.debug(s"[HubClient][${node}] Searching HUB node...")
+    Log.debug(s"[HubClient][${node}] Searching HUB node...")
     Hub.actorRegistry ! Registry.Register(key, hubProps)
     context.become {
       case result: Registry.FoundOrCreated => doWithHub(result.ref, option)
-      case ignore =>
-        xitrum.Log.warn(s"[HubClient][${node}] Unexpected message: $ignore")
     }
   }
 

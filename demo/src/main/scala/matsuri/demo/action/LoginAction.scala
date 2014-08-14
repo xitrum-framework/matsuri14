@@ -1,10 +1,9 @@
 package matsuri.demo.action
 
-import xitrum.{Action, SkipCsrfCheck}
+import xitrum.Action
 import xitrum.annotation.{GET, POST}
 import xitrum.validator.Required
 
-import matsuri.demo.session.SVar
 import matsuri.demo.model.User
 
 @GET("login", "")
@@ -17,19 +16,15 @@ class LoginIndex extends DefaultLayout {
 @POST("login")
 class Login extends Action {
   def execute() {
-
-    val name      = param("name")
-    val password  = param("password")
-
-    Required.exception("name", name)
-    Required.exception("password", password)
+    val name     = param("name")
+    val password = param("password")
 
     User.authLogin(name, password) match {
       case Some(user) =>
         SVar.userName.set(user.name)
-        val a = 1
         redirectTo[ChatIndex]()
-      case None    =>
+
+      case None =>
         flash(t(s"Invalid username or password"))
         redirectTo[LoginIndex]()
     }
@@ -37,9 +32,9 @@ class Login extends Action {
 }
 
 @GET("logout")
-class Logout extends Action with SkipCsrfCheck {
+class Logout extends Action {
   def execute() {
-    SVar.userName.remove
+    session.clear()
     redirectTo[LoginIndex]()
   }
 }

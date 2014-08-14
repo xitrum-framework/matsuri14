@@ -1,4 +1,4 @@
-- import matsuri.demo.action._
+- import matsuri.demo.action.{ChatAction, Logout, SVar}
 
 h3 ChatIndex
 
@@ -24,7 +24,8 @@ div.row#controller
 -
   jsAddToView(
     // This is durty snippets just for demo.
-    "var url = '" + sockJsUrl[Chat] + "';" +
+    "var myName = '" + SVar.userName.get +"';" +
+    "var url = '" + sockJsUrl[ChatAction] + "';" +
     """
     var socket;
     var counter = 0;

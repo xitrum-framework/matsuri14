@@ -4,7 +4,6 @@ import java.util.Date
 import java.text.{ParseException, SimpleDateFormat}
 
 object Converter {
-
   val parser_yyyymmddhhmm = new SimpleDateFormat("yyyyMMddHHmm");
       parser_yyyymmddhhmm.setLenient(false)
   val format_yyyymmddhhmm_with_slash = new SimpleDateFormat("yyyy/MM/dd HH:mm");

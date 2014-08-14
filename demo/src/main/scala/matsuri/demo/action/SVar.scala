@@ -1,4 +1,4 @@
-package matsuri.demo.session
+package matsuri.demo.action
 
 import xitrum.SessionVar
 

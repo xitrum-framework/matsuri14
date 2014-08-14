@@ -6,10 +6,8 @@ import xitrum.{SockJsAction, SockJsText}
 import xitrum.annotation.{GET, SOCKJS}
 import xitrum.util.SeriDeseri
 
-import matsuri.demo.actor.{HubClient, ChatHub, Done, Publish, Push, Pull, Subscribe, UnSubscribe}
+import matsuri.demo.actor.{HubClient, ChatHub, Done, Publish, Push, Pull, Subscribe, Unsubscribe}
 import matsuri.demo.constant.ErrorCD._
-import matsuri.demo.filter.LoginFilter
-import matsuri.demo.session.SVar
 
 @GET("chat")
 class ChatIndex extends DefaultLayout with LoginFilter {
@@ -19,9 +17,9 @@ class ChatIndex extends DefaultLayout with LoginFilter {
 }
 
 @SOCKJS("connect")
-class Chat extends SockJsAction with HubClient {
-  private val hubKey    = "glokkaExampleHub"
-  private val hubProps  = Props[ChatHub]
+class ChatAction extends SockJsAction with HubClient with LoginFilter {
+  private val hubKey   = "glokkaExampleHub"
+  private val hubProps = Props[ChatHub]
 
   def execute() {
     lookUpHub(hubKey, hubProps, Map.empty)
@@ -33,7 +31,6 @@ class Chat extends SockJsAction with HubClient {
     hub ! Subscribe(Map("senderName" -> name, "seq" -> -1))
     context.watch(hub)
     context.become {
-
       // (AnotherNode -> ) Hub -> LocalNode
       case Publish(msg) =>
         if (!msg.isEmpty) {
@@ -70,8 +67,8 @@ class Chat extends SockJsAction with HubClient {
 //
 //          case ("unsubscribe", parsed) =>
 //            // LocalNode -> Hub (-> LocalNode)
-//            log.debug(s"[HubClient][${clientId}] Send UnSubscribe request to HUB")
-//            hub ! UnSubscribe(Map(
+//            log.debug(s"[HubClient][${clientId}] Send Unsubscribe request to HUB")
+//            hub ! Unsubscribe(Map(
 //                                "error"   -> STATUS_SUCCESS,
 //                                "tag"     -> "system",
 //                                "seq"     -> parsed.getOrElse("seq", -1)
@@ -123,5 +120,4 @@ class Chat extends SockJsAction with HubClient {
   }
 
   private def parse2JSON(ref: AnyRef) = SeriDeseri.toJson(ref)
-
 }

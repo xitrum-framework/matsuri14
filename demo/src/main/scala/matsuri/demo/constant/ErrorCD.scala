@@ -1,6 +1,6 @@
 package matsuri.demo.constant
 
-trait ErrorCD {
+object ErrorCD {
   val STATUS_SUCCESS = 0
   val STATUS_FAIL    = 1
 
@@ -9,7 +9,4 @@ trait ErrorCD {
 
   val INVALID_CMD           = 201
   val INVALID_TAG           = 202
-
 }
-
-object ErrorCD extends ErrorCD

@@ -5,24 +5,30 @@ import xitrum.annotation.{GET, POST, PUT, DELETE, Swagger}
 import xitrum.validator.{Required, Range}
 
 import matsuri.demo.constant.ErrorCD._
-import matsuri.demo.filter.AdminFilter
 import matsuri.demo.model.User
 
 @Swagger(
-  Swagger.Summary("List Users"),
-  Swagger.Response(200, "Return all users list"),
-  Swagger.Response(401, "Unauthorized as admin user"),
   Swagger.OptStringQuery("format",               "For API client: set `json`"),
   Swagger.OptStringHeader("X-BasicAuthName",     "For API client: set basicAuth user name"),
-  Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
+  Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password"),
+  Swagger.Response(401, "Unauthorized as admin user")
+)
+trait AdminAction extends DefaultLayout with AdminFilter {
+  protected var format: String = _
+
+  beforeFilter {
+    format = paramo("format").getOrElse("html")
+    true
+  }
+}
+
+@Swagger(
+  Swagger.Summary("List Users"),
+  Swagger.Response(200, "Return all users list")
 )
 @GET("admin")
-class AdminIndex extends DefaultLayout with AdminFilter {
+class AdminIndex extends AdminAction {
   def execute() {
-
-  //
-    val format    = paramo("format").getOrElse("html")
-
     // Get all users
     val users = User.listAll
 
@@ -41,35 +47,24 @@ class AdminIndex extends DefaultLayout with AdminFilter {
   Swagger.Summary("Create User"),
   Swagger.Response(200, "status = 0: Success to create user, status = 1: Failed to create user"),
   Swagger.Response(400, "Invalid request parameter"),
-  Swagger.Response(401, "Unauthorized as admin user"),
   Swagger.StringForm("name"),
   Swagger.StringForm("password"),
   Swagger.OptIntForm("age"),
-  Swagger.OptStringForm("desc"),
-  Swagger.OptStringQuery("format",               "For API client: set `json`"),
-  Swagger.OptStringHeader("X-BasicAuthName",     "For API client: set basicAuth user name"),
-  Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
+  Swagger.OptStringForm("desc")
 )
 @POST("admin/user")
-class AdminUserCreate extends Action with AdminFilter{
+class AdminUserCreate extends AdminAction {
   def execute() {
-
     // Get request paramaters
-    val name      = param("name")
-    val password  = param("password")
+    val name     = param("name")
+    val password = param("password")
     // Optional parameters
-    val age       = paramo[Int]("age")
-    val desc      = paramo("desc")
-    val format    = paramo("format").getOrElse("html")
+    val age      = paramo[Int]("age")
+    val desc     = paramo("desc")
 
     // Validate required parameters
-    Required.exception("name", name)
+    Required.exception("name",     name)
     Required.exception("password", password)
-
-    if (age.isDefined) {
-      val range = Range(0, 100)
-      range.exception("age", age.get)
-    }
 
     // Create user and respond result as JSON format
     User.create(name, password, age, desc) match {
@@ -99,24 +94,18 @@ class AdminUserCreate extends Action with AdminFilter{
   Swagger.Summary("Update User"),
   Swagger.Response(200, "status = 0: Success to update user, status = 1: Failed to update user"),
   Swagger.Response(400, "Invalid request parameter"),
-  Swagger.Response(401, "Unauthorized as admin user"),
   Swagger.StringPath("name"),
   Swagger.OptStringForm("password"),
   Swagger.OptIntForm("age"),
-  Swagger.OptStringForm("desc"),
-  Swagger.OptStringQuery("format",               "For API client: set `json`"),
-  Swagger.OptStringHeader("X-BasicAuthName",     "For API client: set basicAuth user name"),
-  Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
+  Swagger.OptStringForm("desc")
 )
 @PUT("admin/user/:name")
-class AdminUserUpdate extends Action with AdminFilter {
+class AdminUserUpdate extends AdminAction {
   def execute() {
-
-    val name      = param("name")
-    val password  = paramo("password")
-    val age       = paramo[Int]("age")
-    val desc      = paramo("desc")
-    val format    = paramo("format").getOrElse("html")
+    val name     = param("name")
+    val password = paramo("password")
+    val age      = paramo[Int]("age")
+    val desc     = paramo("desc")
     Required.exception("name", name)
 
     if (!password.isDefined && !age.isDefined && !desc.isDefined)
@@ -150,18 +139,12 @@ class AdminUserUpdate extends Action with AdminFilter {
   Swagger.Summary("Update user info"),
   Swagger.Response(200, "status = 0: Success to delete user, status = 1: Failed to delete user"),
   Swagger.Response(400, "Invalid request parameter"),
-  Swagger.Response(401, "Unauthorized as admin user"),
-  Swagger.StringPath("name"),
-  Swagger.OptStringQuery("format",               "For API client: set `json`"),
-  Swagger.OptStringHeader("X-BasicAuthName",     "For API client: set basicAuth user name"),
-  Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
+  Swagger.StringPath("name")
 )
 @DELETE("admin/user/:name")
-class AdminUserDelete extends Action with AdminFilter {
+class AdminUserDelete extends AdminAction {
   def execute() {
-
-    val name   = param("name")
-    val format = paramo("format").getOrElse("html")
+    val name = param("name")
     Required.exception("name", name)
 
     User.delete(name) match {
@@ -184,19 +167,13 @@ class AdminUserDelete extends Action with AdminFilter {
 @Swagger(
   Swagger.Summary("Return specified user information"),
   Swagger.Response(200, "Response User"),
-  Swagger.Response(401, "Unauthorized as admin user"),
   Swagger.Response(404, "No user found by specified name"),
-  Swagger.StringPath("name"),
-  Swagger.OptStringQuery("format",               "For API client: set `json`"),
-  Swagger.OptStringHeader("X-BasicAuthName",     "For API client: set basicAuth user name"),
-  Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password")
+  Swagger.StringPath("name")
 )
 @GET("admin/user/:name")
-class AdminUserShow extends DefaultLayout with AdminFilter {
+class AdminUserShow extends AdminAction {
   def execute() {
-
-    val name   = param("name")
-    val format = paramo("format").getOrElse("html")
+    val name = param("name")
     Required.exception("UserName", name)
 
     val user = User.findByName(name)

@@ -26,6 +26,8 @@ libraryDependencies += "org.codehaus.janino" % "janino" % "2.7.5"
 
 libraryDependencies += "org.webjars" % "bootstrap" % "3.2.0"
 
+libraryDependencies += "org.webjars" % "underscorejs" % "1.6.0-3"
+
 // Scalate template engine config for Xitrum -----------------------------------
 
 libraryDependencies += "tv.cntt" %% "xitrum-scalate" % "2.2"

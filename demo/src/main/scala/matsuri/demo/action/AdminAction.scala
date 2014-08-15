@@ -1,11 +1,11 @@
 package matsuri.demo.action
 
-import xitrum.Action
-import xitrum.annotation.{GET, POST, PUT, DELETE, Swagger}
+import xitrum.{Action, Config}
+import xitrum.annotation.{GET, POST, PUT, DELETE, Swagger, CacheActionMinute}
 import xitrum.validator.{Required, Range}
 
 import matsuri.demo.constant.ErrorCD._
-import matsuri.demo.model.User
+import matsuri.demo.model.{Msg, User}
 
 @Swagger(
   Swagger.OptStringQuery("format",               "For API client: set `json`"),
@@ -190,6 +190,39 @@ class AdminUserShow extends AdminAction {
         else {
           respondDefault404Page()
         }
+    }
+  }
+}
+
+
+// Example of action cache
+@Swagger(
+  Swagger.Summary("Return latest msg, result is cached 1 minute"),
+  Swagger.Response(200, "Response Msg")
+)
+@GET("admin/msg")
+@CacheActionMinute(1)
+class AdminLastMessage extends xitrum.Action {  //AdminAction {
+  def execute(){
+    val msgs = Msg.getLatest(1)
+    respondJson(msgs.map(_.toMap))
+  }
+}
+
+// Example of server-side object cache
+@Swagger(
+  Swagger.Summary("Return latest msg by name, result is from serverside-cache(not database)"),
+  Swagger.Response(200, "Response Msg"),
+  Swagger.StringPath("name")
+)
+@GET("admin/msg/:name")
+class AdminUserMessages extends AdminAction {
+  // latest msg of each user is cached with username at `Msg.insert`
+  val cache = Config.xitrum.cache
+  def execute(){
+    cache.getAs[Map[String, String]](param("name")) match {
+      case Some(m) => respondJson(m)
+      case None    => respondJson(Map.empty)
     }
   }
 }

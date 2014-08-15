@@ -16,7 +16,13 @@ javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 libraryDependencies += "org.mongodb" %% "casbah" % "2.7.3"
 
-libraryDependencies += "tv.cntt" %% "xitrum" % "3.17"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "3.2.4"
+
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "3.2.4"
+
+libraryDependencies += "tv.cntt" %% "xitrum-hazelcast3" % "1.11"
+
+libraryDependencies += "tv.cntt" %% "xitrum" % "3.18-SNAPSHOT"
 
 // Xitrum uses SLF4J, an implementation of SLF4J is needed
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"

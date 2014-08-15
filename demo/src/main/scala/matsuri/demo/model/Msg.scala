@@ -9,7 +9,7 @@ import com.mongodb.casbah.Imports._
 
 import io.netty.util.CharsetUtil.UTF_8
 
-import xitrum.Log
+import xitrum.{Config => XConfig, Log}
 import xitrum.util.Secure
 
 import matsuri.demo.Config
@@ -20,6 +20,7 @@ import matsuri.demo.util.Converter
 
 object Msg extends Log {
   import matsuri.demo.constant.ErrorCD._
+  val cache = XConfig.xitrum.cache
 
   def insert(body:String, senderName:String):Msg = {
     val createdAt = DB.nowSecs()
@@ -30,7 +31,9 @@ object Msg extends Log {
             )
 
     val result = DB.msgsColl.insert(o)
-    new Msg(o.asInstanceOf[MsgCollType])
+    val m = new Msg(o.asInstanceOf[MsgCollType])
+    cache.put(senderName, m.toMap)
+    m
   }
 
   def deleteBySenderName(senderName: String):Int = {
@@ -121,4 +124,3 @@ class Msg(doc: MsgCollType) {
   }
   override def toString = toJson
 }
-

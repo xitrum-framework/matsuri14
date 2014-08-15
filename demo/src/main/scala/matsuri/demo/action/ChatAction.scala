@@ -8,6 +8,7 @@ import xitrum.util.SeriDeseri
 
 import matsuri.demo.actor.{HubClient, ChatHub, Done, Publish, Push, Pull, Subscribe, Unsubscribe}
 import matsuri.demo.constant.ErrorCD._
+import matsuri.demo.model.Msg
 
 @GET("chat")
 class ChatIndex extends DefaultLayout with LoginFilter {
@@ -75,14 +76,56 @@ class ChatAction extends SockJsAction with HubClient with LoginFilter {
 //                              ))
 //
           case ("pull", parsed) =>
-            // LocalNode -> Hub (-> LocalNode)
-            log.debug(s"[${clientId}] Send Pull request to HUB")
-            hub ! Pull(parsed + ("clientId" -> clientId))
+            parsed.getOrElse("cmd", "invalid") match {
+              case "latest10Msg" =>
+                val msgs = Msg.getLatest(10, None)
+                respondSockJsText(parse2JSON(Map(
+                  "tag"     -> "system",
+                  "error"   -> STATUS_SUCCESS,
+                  "seq"     -> parsed.getOrElse("seq", -1),
+                  "msgs"    -> msgs.map(_.toMap)
+                )))
+
+              case "olderThan" =>
+                val olderThanId = if (parsed.isDefinedAt("olderThanId")) Some(parsed("olderThanId").asInstanceOf[String]) else None
+                val msgs = Msg.getLatest(10, olderThanId)
+                respondSockJsText(parse2JSON(Map(
+                  "tag"     -> "system",
+                  "error"   -> STATUS_SUCCESS,
+                  "seq"     -> parsed.getOrElse("seq", -1),
+                  "msgs"    -> msgs.map(_.toMap)
+                )))
+
+              case "allMsg" =>
+                val msgs = Msg.listAll()
+                respondSockJsText(parse2JSON(Map(
+                  "tag"     -> "system",
+                  "error"   -> STATUS_SUCCESS,
+                  "seq"     -> parsed.getOrElse("seq", -1),
+                  "msgs"    -> msgs.map(_.toMap)
+                )))
+
+              case _       =>
+                // LocalNode -> Hub (-> LocalNode)
+                log.debug(s"[${clientId}] Send Pull request to HUB")
+                hub ! Pull(parsed + ("clientId" -> clientId))
+            }
 
           case ("push", parsed) =>
             // LocalNode -> Hub (-> AnotherNode)
-            log.debug(s"[HubClient][${clientId}] Send Push request to HUB")
-            hub ! Push(parsed + ("senderName" -> name, "senderId" -> clientId))
+            parsed.getOrElse("cmd", None) match {
+              case "text" =>
+                val msg = Msg.insert(parsed.getOrElse("body","").toString, name)
+                hub ! Push(Map(
+                        "error"     -> STATUS_SUCCESS,
+                        "seq"       -> parsed.getOrElse("seq", -1),
+                        "targets"   -> parsed.getOrElse("targets", "*"),
+                        "cmd"       -> "text",
+                        "senderId"  -> clientId,
+                        "msg"       -> msg.toMap))
+              case _      =>
+                hub ! Push(parsed + ("senderName" -> name, "senderId" -> clientId))
+            }
 
           case (invalid, parsed) =>
             // LocalNode -> client

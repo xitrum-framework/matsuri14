@@ -41,17 +41,23 @@ class ChatHub extends Hub {
 
   override def handlePush(option: Map[String, Any]): Map[String, Any] = {
     option.getOrElse("cmd", "invalid") match {
-      case "text" =>
-        val msg = Msg.insert(option.getOrElse("body","").toString, option.getOrElse("senderName","Anonymous").toString)
+      case "text" => option
+      case "ping" =>
         Map(
           "error"     -> STATUS_SUCCESS,
           "seq"       -> option.getOrElse("seq", -1),
           "targets"   -> option.getOrElse("targets", "*"),
-          "tag"       -> "text",
-          "senderId"  -> option.getOrElse("senderId",""),
-          "msg"       -> msg.toMap
+          "tag"       -> "ping",
+          "senderId"  -> option.getOrElse("senderId","")
         )
-
+      case "pong" =>
+        Map(
+          "error"     -> STATUS_SUCCESS,
+          "seq"       -> option.getOrElse("seq", -1),
+          "targets"   -> option.getOrElse("targets", ""),
+          "tag"       -> "pong",
+          "senderId"  -> option.getOrElse("senderId","")
+        )
       case unknown =>
         Map(
           "tag"     -> "system",
@@ -63,32 +69,12 @@ class ChatHub extends Hub {
   }
   override def handlePull(option: Map[String, Any]): Map[String, Any] = {
     option.getOrElse("cmd", "invalid") match {
-      case "latest10Msg" =>
-        val msgs = Msg.getLatest(10, None)
+      case "clientCount" =>
         Map(
-          "tag"     -> "system",
+          "tag"     -> "clientCount",
           "error"   -> STATUS_SUCCESS,
           "seq"     -> option.getOrElse("seq", -1),
-          "msgs"    -> msgs.map(_.toMap)
-        )
-
-      case "olderThan" =>
-        val olderThanId = if (option.isDefinedAt("olderThanId")) Some(option("olderThanId").asInstanceOf[String]) else None
-        val msgs = Msg.getLatest(10, olderThanId)
-        Map(
-          "tag"     -> "system",
-          "error"   -> STATUS_SUCCESS,
-          "seq"     -> option.getOrElse("seq", -1),
-          "msgs"    -> msgs.map(_.toMap)
-        )
-
-      case "allMsg" =>
-        val msgs = Msg.listAll()
-        Map(
-          "tag"     -> "system",
-          "error"   -> STATUS_SUCCESS,
-          "seq"     -> option.getOrElse("seq", -1),
-          "msgs"    -> msgs.map(_.toMap)
+          "count"   -> clients.size
         )
 
       case unknown =>

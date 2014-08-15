@@ -20,7 +20,11 @@ div.row#controller
           input.form-control(type="text" id="msg" placeholder="Type text here")
           span.input-group-btn
             button.btn.btn-default#btn_send Send
-
+      br
+      div.row
+        div.col-sm-offset-2.col-sm-10
+          button.btn.btn-primary#btn_count Get clients count
+          button.btn.btn-primary#btn_ping Ping
 -
   jsAddToView(
     // This is durty snippets just for demo.
@@ -29,7 +33,16 @@ div.row#controller
     """
     var socket;
     var counter = 0;
-    var callbacks = {};
+    var callbacks = [];
+
+    $("#msg").keypress(function(e){
+      if (e.keyCode === 13) {
+        $("#btn_send").click();
+        return false;
+      } else {
+        return true;
+      }
+    });
 
     $("#btn_send").on("click",function(e){
       e.preventDefault();
@@ -42,15 +55,48 @@ div.row#controller
       callbacks[counter] = function(obj){
         var text;
         if(obj.error === 0){
-          text = '<b>[Success: Push to HUB]</b><br />';
+          text = '<b>[Success: push text]</b>';
           text = text + xitrum.escapeHtml(JSON.stringify(obj.msg)) + '<br />';
         } else {
-          text = '<b style="color:red">[Fail: Push to HUB]</b>'+obj.error+'<br />';
+          text = '<b style="color:red">[Fail: push text]</b>'+obj.error+'<br />';
         }
         xitrum.appendAndScroll('#output', text);
       }
-      socket.send(JSON.stringify(pushRequest));
       counter++;
+      socket.send(JSON.stringify(pushRequest));
+      $("#msg").val("");
+    });
+
+    $("#btn_count").on("click",function(e){
+      e.preventDefault();
+      var pullCountRequest = {
+        tag:"pull",
+        cmd:"clientCount",
+        seq:counter
+      }
+      callbacks[counter] = function(obj){
+        var text;
+        if(obj.error === 0){
+          text = '<b>[Success: pull clientCount]</b> '+ obj.count +'<br />';
+        } else {
+          text = '<b style="color:red">[Fail: pull clientCount]</b>'+obj.error+'<br />';
+        }
+        xitrum.appendAndScroll('#output', text);
+      }
+      counter++;
+      socket.send(JSON.stringify(pullCountRequest));
+    });
+
+    $("#btn_ping").on("click",function(e){
+      e.preventDefault();
+      var pushPingRequest = {
+        tag:"push",
+        cmd:"ping",
+        seq:counter
+      }
+      callbacks[counter] = function(obj){}
+      counter++;
+      socket.send(JSON.stringify(pushPingRequest));
     });
 
     var initSocket = function() {
@@ -69,15 +115,15 @@ div.row#controller
           console.log("Callback for Initial latest10msg request", obj)
           var text = "";
           if(obj.error === 0){
-            //text = '<b>[Success: Pull from HUB]</b><br />';
+            text = '<b>[Success: latest10Msg]</b><br />';
             text = text + xitrum.escapeHtml(JSON.stringify(obj.msgs)) + '<br />';
           } else {
-            text = '<b style="color:red">[Fail: Pull from HUB]</b>'+obj.error+'<br />';
+            text = '<b style="color:red">[Fail: latest10Msg]</b>'+obj.error+'<br />';
           }
           xitrum.appendAndScroll('#output', text);
         }
-        socket.send(JSON.stringify(initRequest));
         counter++;
+        socket.send(JSON.stringify(initRequest));
       };
 
       socket.onclose = function(event) {
@@ -90,15 +136,28 @@ div.row#controller
         var obj = JSON.parse(event.data);
         var text = "";
         if (obj.tag === "system") {
-          //text = '<b>[SYSTEM MESSAGE from HUB]</b><br />';
+          //text = '<b>[SYSTEM MESSAGE]<br />';
         } else if (obj.tag === "joinMsg") {
-          //text = '<b>[JOIN MESSAGE from HUB]</b><br />';
+          text = '<b>[JOIN MESSAGE]</b><br />';
           text = text + xitrum.escapeHtml(JSON.stringify(obj.senderName)) + ' Joined<br />';
         } else if (obj.tag === "leaveMsg") {
-          //text = '<b>[LEAVE MESSAGE from HUB]</b><br />';
+          text = '<b>[LEAVE MESSAGE]</b><br />';
           text = text + xitrum.escapeHtml(JSON.stringify(obj.senderName)) + ' Left<br />';
+        } else if (obj.tag === "ping") {
+          text = text + '<b>[Ping from '+ obj.senderId +']</b><br />';
+          var pushPongRequest = {
+            tag:"push",
+            cmd:"pong",
+            targets:obj.senderId,
+            seq:counter
+          }
+          callbacks[counter] = function(obj){}
+          counter++;
+          socket.send(JSON.stringify(pushPongRequest));
+        } else if (obj.tag === "pong") {
+          text = text + '<b>[Pong from '+ obj.senderId +']</b><br />';
         } else {
-          //text = '<b>[MESSAGE from '+ obj.senderId +' via HUB]</b><br />';
+          text = '<b>[MESSAGE from '+ obj.senderId +']</b><br />';
           text = text + xitrum.escapeHtml(JSON.stringify(obj.msg)) + '<br />';
         }
         xitrum.appendAndScroll('#output', text);

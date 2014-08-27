@@ -22,7 +22,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "3.2.4"
 
 libraryDependencies += "tv.cntt" %% "xitrum-hazelcast3" % "1.11"
 
-libraryDependencies += "tv.cntt" %% "xitrum" % "3.18-SNAPSHOT"
+libraryDependencies += "tv.cntt" %% "xitrum" % "3.18"
 
 // Xitrum uses SLF4J, an implementation of SLF4J is needed
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"

@@ -8,6 +8,7 @@ import matsuri.demo.constant.ErrorCD._
 import matsuri.demo.model.{Msg, User}
 
 @Swagger(
+  Swagger.Resource("admin","admin actions", 0),
   Swagger.OptStringQuery("format",               "For API client: set `json`"),
   Swagger.OptStringHeader("X-BasicAuthName",     "For API client: set basicAuth user name"),
   Swagger.OptStringHeader("X-BasicAuthPassword", "For API client: set basicAuth user password"),
@@ -202,7 +203,7 @@ class AdminUserShow extends AdminAction {
 )
 @GET("admin/msg")
 @CacheActionMinute(1)
-class AdminLastMessage extends xitrum.Action {  //AdminAction {
+class AdminLastMessage extends AdminAction {
   def execute(){
     val msgs = Msg.getLatest(1)
     respondJson(msgs.map(_.toMap))

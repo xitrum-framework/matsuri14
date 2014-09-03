@@ -1,0 +1,10 @@
+demo/.*
+demo/log
+demo/project/project
+demo/project/target
+demo/routes.cache
+demo/target
+demo/upload
+demo/tmp
+
+cluster_demo

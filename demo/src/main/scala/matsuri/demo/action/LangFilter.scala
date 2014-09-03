@@ -7,7 +7,7 @@ trait LangFilter {
   this: Action =>
 
   beforeFilter {
-    autosetLanguage("ja")
+    autosetLanguage("en","ja")
     true
   }
 }

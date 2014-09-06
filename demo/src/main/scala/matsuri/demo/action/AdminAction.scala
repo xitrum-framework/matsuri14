@@ -31,14 +31,14 @@ trait AdminAction extends DefaultLayout with AdminFilter {
 class AdminIndex extends AdminAction {
   def execute() {
     // Get all users
-    val users = User.listAll
+    val users = User.listAll()
 
     if (format == "json") respondJson(users.map(_.toMap))
     else {
       // Share user with view template
       at("users") = users
 
-      // Response respons view with template
+      // Response view with template
       respondView()
     }
   }
@@ -181,7 +181,7 @@ class AdminUserShow extends AdminAction {
 
     user match {
       case Some(user) =>
-        if (format == "json") respondJson(Map("user" -> user))
+        if (format == "json") respondJson(user.toMap)
         else {
           at("user") = user
           respondView()
@@ -201,7 +201,7 @@ class AdminUserShow extends AdminAction {
   Swagger.Summary("Return latest msg, result is cached 1 minute"),
   Swagger.Response(200, "Response Msg")
 )
-@GET("admin/msg")
+@GET("admin/lastmsg")
 @CacheActionMinute(1)
 class AdminLastMessage extends AdminAction {
   def execute(){
@@ -225,5 +225,16 @@ class AdminUserMessages extends AdminAction {
       case Some(m) => respondJson(m)
       case None    => respondJson(Map.empty)
     }
+  }
+}
+
+@GET("admin/msgs/:num")
+class AdminMsgs extends Action with DefaultLayout {
+  def execute() {
+    val num = param[Int]("num")
+    val msgs = Msg.getLatest(num)
+    // respondJson(msgs.map(_.toMap))
+    at("msgs") = msgs
+    respondView()
   }
 }

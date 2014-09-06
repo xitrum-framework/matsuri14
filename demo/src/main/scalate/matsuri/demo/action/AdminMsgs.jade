@@ -1,0 +1,17 @@
+
+- import matsuri.demo.action._
+- import matsuri.demo.model.Msg
+
+div.row#msgTable
+  table.table.table-striped#messageTable
+    thead
+      tr.bg-primary
+        th.col-xs-2 =t("body")
+        th.col-xs-2 =t("senderName")
+        th.col-xs-2 =t("Created time")
+    tbody
+    - for (msg <- at("msgs").asInstanceOf[List[Msg]])
+      tr
+        th = msg.body
+        th = msg.senderName
+        th = msg.createdAt
